@@ -1,7 +1,7 @@
 import java.util.concurrent.locks.*;
 
 public class Philosopher extends Thread {
-  private static int WAITING=0, EATING=1, THINKING=2;
+  private static int WAITING = 0, EATING = 1, THINKING = 2;
   private Lock lock;
   private Condition phil [];
   private int states [];
@@ -9,20 +9,32 @@ public class Philosopher extends Thread {
   private int id;
   private final int TURNS = 20;
 
+  // con
   public Philosopher (Lock l, Condition p[], int st[], int num) {
-    lock = l; phil = p; states = st;
+    lock = l;
+    phil = p;
+    states = st;
     NUM_PHILS = num;
   }
 
   public void run () {
-    // id = ThreadID.get();
-    // for (int k=0; k<TURNS; k++) {
-    //   try { sleep(100); } catch (Exception ex) { /* lazy */}
-    //   takeSticks(id); try { sleep(20); } catch (Exception ex) { }
-    //   putSticks(id);
-    // }
+    id = ThreadID.get();
+    for (int k = 0; k < TURNS; k++) {
+      try {
+        sleep(100);
+      } catch (Exception ex) { /* lazy */}
+      takeSticks(id);
+
+      try {
+        sleep(20);
+      } catch (Exception ex) { }
+      putSticks(id);
+    }
+    output();
   }
 
+  // if the left and right chopstick is free for the current philosopher, they can enter the EATING state
+  // if one chopstick is unavailable, the philosopher waits to be notified of when the chopstick will be available
   public void takeSticks (int id) {
     lock.lock();
     try {
@@ -30,20 +42,19 @@ public class Philosopher extends Thread {
         states[id] = EATING;
       else {
         states[id] = WAITING;
+        //philosopher waits until signalled or interrupted
         phil[id].await();
       }
-    }
-    catch(InterruptedException e){
+    } catch(InterruptedException e){
       System.exit(-1);
-    }
-    finally {
+    } finally {
       lock.unlock();
     }
   }
 
-  public void output(String s) {
+  public void output() {
     lock.lock();
-    for (int k=0; k<states.length; k++)
+    for (int k = 0; k < states.length; k++)
       System.out.print(states[k]+",");
     lock.unlock();
     System.out.println();
