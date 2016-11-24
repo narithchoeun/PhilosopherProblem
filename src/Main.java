@@ -13,25 +13,28 @@ How well does your solution scale? Do you observe any bottleneck?
 Submit your program, cover sheet & a summary/discussion of the 4 experiments.
 */
 import java.util.concurrent.locks.*;
+
 public class Main {
   private static int WAITING = 0, EATING = 1, THINKING = 2;
-  private static final int NUM_PHILS = 5;
+  private static final int NUM_PHILS = 10;
   private static Lock lock = new ReentrantLock();
-  private static Condition phil [] = new Condition[NUM_PHILS];
+  private static Condition philosophers [] = new Condition[NUM_PHILS];
   private static int states [] = new int[NUM_PHILS];
 
-  public static void init ( ) {
+  // init all philosophers to THINKING
+  public static void init () {
     for (int k = 0; k < NUM_PHILS; k++) {
-      phil[k] = lock.newCondition();
+      philosophers[k] = lock.newCondition();
       states[k] = THINKING;
     }
   }
 
+  // main
   public static void main(String[] args) {
     init();
     Philosopher p[] = new Philosopher[NUM_PHILS];
     for (int k = 0; k < p.length; k++) {
-      p[k] = new Philosopher(lock, phil, states, NUM_PHILS);
+      p[k] = new Philosopher(lock, philosophers, states, NUM_PHILS);
       p[k].start();
     }
   }
