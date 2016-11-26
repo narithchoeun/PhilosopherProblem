@@ -49,9 +49,11 @@ public class Philosopher extends Thread {
   public void takeSticks (int id) {
     lock.lock();
     try {
-      if (states[leftof(id)] != EATING && states[rightof(id)] != EATING)
+      if (states[leftof(id)] != EATING && states[rightof(id)] != EATING && Main.queue.get(0) == id) {
+        Main.queue.remove(0);
         states[id] = EATING;
-      else {
+      } else {
+        Main.queue.add(id);
         states[id] = WAITING;
         //philosopher waits until signaled or interrupted
         philosophers[id].await();

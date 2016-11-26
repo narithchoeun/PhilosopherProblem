@@ -13,6 +13,7 @@ How well does your solution scale? Do you observe any bottleneck?
 Submit your program, cover sheet & a summary/discussion of the 4 experiments.
 */
 import java.util.concurrent.locks.*;
+import java.util.ArrayList;
 
 public class Main {
   private static int WAITING = 0, EATING = 1, THINKING = 2;
@@ -20,6 +21,7 @@ public class Main {
   private static Lock lock = new ReentrantLock();
   private static Condition philosophers [] = new Condition[NUM_PHILS];
   private static int states [] = new int[NUM_PHILS];
+  public static ArrayList<Integer> queue = new ArrayList<Integer>(); 
 
   // init all philosophers to THINKING
   public static void init () {
