@@ -54,6 +54,7 @@ public class Philosopher extends Thread {
         // System.out.println(id + " trying to take sticks...");
         try {
             if(Main.q.peek() != null){
+                // System.out.println("Peek: " + Main.q.peek());
                 if ((states[leftof(id)] != EATING && states[rightof(id)] != EATING) && (Main.q.peek() == id)) {
                     // System.out.println(id + " took sticks");
                     Main.q.remove();
@@ -61,6 +62,7 @@ public class Philosopher extends Thread {
                 }
             } else {
                 Main.q.add(id);
+                // System.out.println("Add: " + Main.q.peek());
                 states[id] = WAITING;
                 //philosopher waits until signaled or interrupted
                 philosophers[id].await();
@@ -74,9 +76,14 @@ public class Philosopher extends Thread {
     // print the states of the philosophers
     public void output() {
         lock.lock();
-        for (int k = 0; k < states.length; k++)
-        System.out.print(states[k] + ",");
+        
+        System.out.println("id: " + id);
+        for (int k = 0; k < states.length; k++) {
+            System.out.print(states[k] + ",");
+        }
+
         lock.unlock();
+
         System.out.println();
         System.out.println();
     }
