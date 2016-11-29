@@ -5,10 +5,9 @@ public class Philosopher extends Thread {
     private static int WAITING = 0, EATING = 1, THINKING = 2;
     private Lock lock;
     private Condition philosophers [];
-    private int states []; //implicitly describes forks
     private int NUM_PHILS;
     private int id;
-    private final int TURNS = 3;
+    private final int TURNS = 5;
 
     private int maxSleepTime = 100;
     private Random rand = new Random();;
@@ -17,10 +16,9 @@ public class Philosopher extends Thread {
     private int stallCtr = 0;
 
     // constructor
-    public Philosopher (Lock l, Condition p[], int st[], int num) {
+    public Philosopher (Lock l, Condition p[], int num) {
         lock = l;
         philosophers = p;
-        states = st;
         NUM_PHILS = num;
     }
 
@@ -34,12 +32,12 @@ public class Philosopher extends Thread {
                 sleep(randomTime());
             } catch (Exception ex) { /* lazy */ }
             takeSticks(id);
+            output();
 
             try {
                 sleep(randomTime());
             } catch (Exception ex) { }
             putSticks(id);
-            output();
         }
 
         endTime = System.nanoTime();
@@ -52,15 +50,15 @@ public class Philosopher extends Thread {
     public void takeSticks (int id) {
         lock.lock();
         try {
-            Boolean state_status = (states[leftof(id)] != EATING && states[rightof(id)] != EATING);
+            Boolean state_status = (Main.states[leftof(id)] != EATING && Main.states[rightof(id)] != EATING);
             if (state_status && (Main.q.peek() == null)) {
-                states[id] = EATING;
+                Main.states[id] = EATING;
             } else if (state_status && (Main.q.peek() == id)) {
                 Main.q.remove();
-                states[id] = EATING;
+                Main.states[id] = EATING;
             } else {
                 Main.q.add(id);
-                states[id] = WAITING;
+                Main.states[id] = WAITING;
                 //philosopher waits until signaled or interrupted
                 philosophers[id].await();
                 takeSticks(id);
@@ -76,8 +74,8 @@ public class Philosopher extends Thread {
         lock.lock();
         
         System.out.println("id: " + id);
-        for (int k = 0; k < states.length; k++) {
-            System.out.print(states[k] + ",");
+        for (int k = 0; k < Main.states.length; k++) {
+            System.out.print(Main.states[k] + ",");
         }
 
         lock.unlock();
@@ -90,20 +88,16 @@ public class Philosopher extends Thread {
     public void putSticks (int id) {
         lock.lock();
         try {
-            states[id] = THINKING;
+            Main.states[id] = THINKING;
             //if the left philosopher is waiting to eat and the left of that philosopher is not eating,
             //signal that person that the stick is now available to use and begin eating
-            if ((states[leftof(id)]==WAITING && states[leftof(leftof(id))]!=EATING) && (Main.q.peek() == leftof(id))) {
-                philosophers[leftof(id)].signal();
-                states[leftof(id)] = EATING;
-                // System.out.println(states[leftof(id)] + " is now eating(left)");
-            }
+            if (Main.q.peek() != null) {
+                int head = Main.q.remove();
 
-            //same for right philosopher
-            if ((states[rightof(id)] == WAITING && states[rightof(rightof(id))] != EATING) && (Main.q.peek() == rightof(id))) {
-                philosophers[rightof(id)].signal();
-                states[rightof(id)] = EATING;
-                // System.out.println(states[leftof(id)] + " is now eating(right)");
+                if ((Main.states[leftof(head)] != EATING && Main.states[rightof(head)] != EATING)) {
+                    philosophers[head].signal();
+                    Main.states[head] = EATING;
+                }
             }
         } finally {
             lock.unlock();
