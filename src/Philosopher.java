@@ -51,22 +51,19 @@ public class Philosopher extends Thread {
     // if one chopstick is unavailable, the philosopher waits to be notified of when the chopstick will be available
     public void takeSticks (int id) {
         lock.lock();
-        // System.out.println(id + " trying to take sticks...");
-        try {                // System.out.println("Peek: " + Main.q.peek());
+        try {
             Boolean state_status = (states[leftof(id)] != EATING && states[rightof(id)] != EATING);
             if (state_status && (Main.q.peek() == null)) {
-                System.out.println("eating");
                 states[id] = EATING;
             } else if (state_status && (Main.q.peek() == id)) {
-                System.out.println("Remove: " + Main.q.peek());
                 Main.q.remove();
                 states[id] = EATING;
             } else {
                 Main.q.add(id);
-                System.out.println("Add: " + Main.q.peek());
                 states[id] = WAITING;
                 //philosopher waits until signaled or interrupted
                 philosophers[id].await();
+                takeSticks(id);
             }
         } catch (Exception e) { }
         finally {
@@ -96,21 +93,18 @@ public class Philosopher extends Thread {
             states[id] = THINKING;
             //if the left philosopher is waiting to eat and the left of that philosopher is not eating,
             //signal that person that the stick is now available to use and begin eating
-            if (Main.q.peek() != null){
-                if ((states[leftof(id)]==WAITING && states[leftof(leftof(id))]!=EATING) && (Main.q.peek() == leftof(id))) {
-                    philosophers[leftof(id)].signal();
-                    states[leftof(id)] = EATING;
-                    // System.out.println(states[leftof(id)] + " is now eating(left)");
-                }
-
-                //same for right philosopher
-                if ((states[rightof(id)] == WAITING && states[rightof(rightof(id))] != EATING) && (Main.q.peek() == rightof(id))) {
-                    philosophers[rightof(id)].signal();
-                    states[rightof(id)] = EATING;
-                    // System.out.println(states[leftof(id)] + " is now eating(right)");
-                }
+            if ((states[leftof(id)]==WAITING && states[leftof(leftof(id))]!=EATING) && (Main.q.peek() == leftof(id))) {
+                philosophers[leftof(id)].signal();
+                states[leftof(id)] = EATING;
+                // System.out.println(states[leftof(id)] + " is now eating(left)");
             }
 
+            //same for right philosopher
+            if ((states[rightof(id)] == WAITING && states[rightof(rightof(id))] != EATING) && (Main.q.peek() == rightof(id))) {
+                philosophers[rightof(id)].signal();
+                states[rightof(id)] = EATING;
+                // System.out.println(states[leftof(id)] + " is now eating(right)");
+            }
         } finally {
             lock.unlock();
         }
