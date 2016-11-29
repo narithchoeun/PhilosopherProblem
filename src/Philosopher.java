@@ -52,17 +52,18 @@ public class Philosopher extends Thread {
     public void takeSticks (int id) {
         lock.lock();
         // System.out.println(id + " trying to take sticks...");
-        try {
-            if(Main.q.peek() != null){
-                // System.out.println("Peek: " + Main.q.peek());
-                if ((states[leftof(id)] != EATING && states[rightof(id)] != EATING) && (Main.q.peek() == id)) {
-                    // System.out.println(id + " took sticks");
-                    Main.q.remove();
-                    states[id] = EATING;
-                }
+        try {                // System.out.println("Peek: " + Main.q.peek());
+            Boolean state_status = (states[leftof(id)] != EATING && states[rightof(id)] != EATING);
+            if (state_status && (Main.q.peek() == null)) {
+                System.out.println("eating");
+                states[id] = EATING;
+            } else if (state_status && (Main.q.peek() == id)) {
+                System.out.println("Remove: " + Main.q.peek());
+                Main.q.remove();
+                states[id] = EATING;
             } else {
                 Main.q.add(id);
-                // System.out.println("Add: " + Main.q.peek());
+                System.out.println("Add: " + Main.q.peek());
                 states[id] = WAITING;
                 //philosopher waits until signaled or interrupted
                 philosophers[id].await();
