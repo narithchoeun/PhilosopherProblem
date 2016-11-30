@@ -18,7 +18,7 @@ import java.util.Queue;
 
 public class Main {
     private static int WAITING = 0, EATING = 1, THINKING = 2;
-    private static final int NUM_PHILS = 5;
+    private static final int NUM_PHILS = 10;
     private static Lock lock = new ReentrantLock();
     private static Condition philosophers [] = new Condition[NUM_PHILS];
     public static int states [] = new int[NUM_PHILS];
@@ -36,7 +36,7 @@ public class Main {
         init();
         Philosopher p[] = new Philosopher[NUM_PHILS];
         for (int k = 0; k < p.length; k++) {
-            p[k] = new Philosopher(lock, philosophers, NUM_PHILS);
+            p[k] = new Philosopher(lock, philosophers, NUM_PHILS, 0, 0);
             p[k].start();
         }
     }
