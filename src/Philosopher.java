@@ -49,17 +49,23 @@ public class Philosopher extends Thread {
     // if one chopstick is unavailable, the philosopher waits to be notified of when the chopstick will be available
     public void takeSticks (int id) {
         lock.lock();
+        // System.out.println(id + " wants to eat");
         try {
             Boolean state_status = (Main.states[leftof(id)] != EATING && Main.states[rightof(id)] != EATING);
             if (state_status && (Main.q.peek() == null)) {
                 Main.states[id] = EATING;
+                // System.out.println(id + " is eating.");
             } else if (state_status && (Main.q.peek() == id)) {
                 Main.q.remove();
                 Main.states[id] = EATING;
+                // System.out.println(id + " is eating.");
+            } else if (state_status) {
+                Main.states[id] = EATING;
+                // System.out.println(id + " is eating.");
             } else {
                 Main.q.add(id);
                 Main.states[id] = WAITING;
-                //philosopher waits until signaled or interrupted
+                // System.out.println(id + " is waiting.");
                 philosophers[id].await();
                 takeSticks(id);
             }
@@ -73,7 +79,6 @@ public class Philosopher extends Thread {
     public void output() {
         lock.lock();
         
-        System.out.println("id: " + id);
         for (int k = 0; k < Main.states.length; k++) {
             System.out.print(Main.states[k] + ",");
         }
@@ -89,15 +94,30 @@ public class Philosopher extends Thread {
         lock.lock();
         try {
             Main.states[id] = THINKING;
+            // System.out.println(id + " is thinking.");
             //if the left philosopher is waiting to eat and the left of that philosopher is not eating,
-            //signal that person that the stick is now available to use and begin eating
-            if (Main.q.peek() != null) {
+            //signal that person that the stick is now available to use and begin eating            
+            if (Main.q.peek() == null) {
+                if ((Main.states[leftof(id)]==WAITING && Main.states[leftof(leftof(id))]!=EATING)) {
+                    philosophers[leftof(id)].signal();
+                    // System.out.println("Signals " + leftof(id));
+                    Main.states[leftof(id)] = EATING;
+                    // System.out.println(states[leftof(id)] + " is now eating(left)");
+                }
+
+                //same for right philosopher
+                if ((Main.states[rightof(id)] == WAITING && Main.states[rightof(rightof(id))] != EATING)) {
+                    philosophers[rightof(id)].signal();
+                    // System.out.println("Signals " + rightof(id));
+                    Main.states[rightof(id)] = EATING;
+                    // System.out.println(states[leftof(id)] + " is now eating(right)");
+                }
+            } else {
                 int head = Main.q.remove();
 
-                if ((Main.states[leftof(head)] != EATING && Main.states[rightof(head)] != EATING)) {
-                    philosophers[head].signal();
-                    Main.states[head] = EATING;
-                }
+                philosophers[head].signal();
+                // System.out.println("Signals " + head);
+                Main.states[head] = EATING;
             }
         } finally {
             lock.unlock();
